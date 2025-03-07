@@ -59,10 +59,11 @@ pipeline {
 }
 
         stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
+    steps {
+        bat 'npm install'
+    }
+}
+
 
         stage('Build Angular Project') {
             steps {
