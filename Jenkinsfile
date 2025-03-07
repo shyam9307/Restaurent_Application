@@ -53,10 +53,10 @@ pipeline {
 
     stages {
         stage('Checkout Code') {
-            steps {
-                git 'https://github.com/patildinu/Restaurent_Application.git'
-            }
-        }
+    steps {
+        git branch: 'main', url: 'https://github.com/patildinu/Restaurent_Application.git'
+    }
+}
 
         stage('Install Dependencies') {
             steps {
