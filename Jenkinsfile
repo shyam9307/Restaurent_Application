@@ -1,7 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'node:16'  // Using Node.js 16 for better compatibility
+            // Use a specific tag to ensure Node.js 18.19.0 is used.
+            image 'node:18.19.0-bullseye'
             args '-u root'
         }
     }
@@ -26,17 +27,17 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES') {
                     script {
                         try {
-                            sh 'echo "🔄 Setting NPM legacy-peer-deps..."'
+                            echo "🔄 Setting NPM legacy-peer-deps..."
                             sh 'npm config set legacy-peer-deps true'
 
-                            sh 'echo "🔄 Running npm install"'
-                            sh 'npm install'  // Handles dependency conflicts
-
-                            sh 'echo "🔄 Installing Angular CLI globally"'
+                            echo "🔄 Running npm install..."
+                            sh 'npm install'
+                            
+                            echo "🔄 Installing Angular CLI globally..."
                             sh 'npm install -g @angular/cli'
-
-                            sh 'echo "🔄 Verifying Angular CLI installation"'
-                            sh 'npx ng version'  // Check Angular CLI availability
+                            
+                            echo "🔄 Verifying Angular CLI installation..."
+                            sh 'npx ng version'
                         } catch (Exception e) {
                             echo '⚠️ npm install failed, retrying with --force'
                             sh 'npm install --force'
@@ -46,7 +47,7 @@ pipeline {
                 echo "✅ Dependencies installed successfully!"
             }
         }
-
+        
         stage('Check Node Version') {
            steps {
                echo "🔍 Checking Node.js and npm versions..."
@@ -60,11 +61,11 @@ pipeline {
             steps {
                 echo "🏗️ Starting Build process..."
                 timeout(time: 10, unit: 'MINUTES') {
-                    sh 'echo "🔍 Checking Angular CLI version"'
-                    sh 'npx ng version'  // Ensure CLI is accessible
-
-                    sh 'echo "🔄 Running ng build"'
-                    sh 'npx ng build'  // Use npx to execute Angular CLI
+                    echo "🔍 Checking Angular CLI version before build..."
+                    sh 'npx ng version'
+                    
+                    echo "🔄 Running ng build..."
+                    sh 'npx ng build'
                 }
                 echo "✅ Build completed successfully!"
             }
@@ -93,7 +94,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "🚀 Starting Deployment..."
-                // Add deployment commands here
+                // Add your deployment commands here
                 echo "✅ Deployment process completed!"
             }
         }
@@ -108,6 +109,7 @@ pipeline {
         }
     }
 }
+
 
 
 
