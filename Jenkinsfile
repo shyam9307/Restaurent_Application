@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'node:16'
+            image 'node:18'  // Updated to Node.js 18
             args '-u root'
         }
     }
@@ -12,17 +12,14 @@ pipeline {
         stage('Checkout') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
-                    // Clone the repository from GitHub
                     git url: 'https://github.com/shyam9307/Restaurent_Application', branch: 'main'
                 }
             }
         }
         stage('Install Dependencies') {
             steps {
-                timeout(time: 7, unit: 'MINUTES') {
-                    // Install npm dependencies
+                timeout(time: 5, unit: 'MINUTES') {
                     sh 'npm install'
-                    // Install Angular CLI globally so that 'ng' command is available
                     sh 'npm install -g @angular/cli'
                 }
             }
@@ -30,7 +27,7 @@ pipeline {
         stage('Build') {
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
-                    // Build the Angular application
+                    sh 'ng version'  // Check Angular CLI and Node.js version before build
                     sh 'ng build'
                 }
             }
@@ -38,7 +35,6 @@ pipeline {
         stage('Test') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                    // Run tests if defined in package.json
                     sh 'npm test'
                 }
             }
@@ -46,7 +42,6 @@ pipeline {
         stage('Archive Artifacts') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
-                    // Archive the build artifacts (assuming output is in the "dist" directory)
                     archiveArtifacts artifacts: 'dist/**', fingerprint: true
                 }
             }
