@@ -6,39 +6,49 @@ pipeline {
         }
     }
     environment {
-        // Set any environment variables if needed (e.g., NODE_ENV)
         NODE_ENV = "production"
     }
     stages {
         stage('Checkout') {
             steps {
-                // Cloning the repository from GitHub
-                git url: 'https://github.com/shyam9307/Restaurent_Application', branch: 'main'
+                timeout(time: 2, unit: 'MINUTES') {
+                    // Clone the repository from GitHub
+                    git url: 'https://github.com/shyam9307/Restaurent_Application', branch: 'main'
+                }
             }
         }
         stage('Install Dependencies') {
             steps {
-                // Install project dependencies using npm
-                sh 'npm install'
+                timeout(time: 7, unit: 'MINUTES') {
+                    // Install npm dependencies
+                    sh 'npm install'
+                    // Install Angular CLI globally so that 'ng' command is available
+                    sh 'npm install -g @angular/cli'
+                }
             }
         }
         stage('Build') {
             steps {
-                // Build the project; change this command if your package.json uses a different build command.
-                // For Angular projects, you might use: ng build --prod
-                sh 'npm run build'
+                timeout(time: 10, unit: 'MINUTES') {
+                    // Build the Angular application
+                    sh 'ng build'
+                }
             }
         }
         stage('Test') {
             steps {
-                // Run tests defined in your package.json (if available)
-                sh 'npm test'
+                timeout(time: 5, unit: 'MINUTES') {
+                    // Run tests if defined in package.json
+                    sh 'npm test'
+                }
             }
         }
         stage('Archive Artifacts') {
             steps {
-                // Archive the build artifacts (adjust the path to your actual output folder)
-                archiveArtifacts artifacts: 'dist/**', fingerprint: true
+                timeout(time: 2, unit: 'MINUTES') {
+                    // Archive the build artifacts (assuming output is in the "dist" directory)
+                    archiveArtifacts artifacts: 'dist/**', fingerprint: true
+                }
             }
         }
     }
