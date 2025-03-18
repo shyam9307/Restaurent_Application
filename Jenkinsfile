@@ -1,8 +1,7 @@
 pipeline {
     agent {
         docker {
-            // Use a specific tag to ensure Node.js 18.19.0 is used.
-            image 'node:18.19.0-bullseye'
+            image 'node:16'  // Using Node.js 16 (Angular 12 supports Node 16)
             args '-u root'
         }
     }
@@ -29,12 +28,15 @@ pipeline {
                         try {
                             echo "🔄 Setting NPM legacy-peer-deps..."
                             sh 'npm config set legacy-peer-deps true'
-
+                            
                             echo "🔄 Running npm install..."
                             sh 'npm install'
                             
-                            echo "🔄 Installing Angular CLI globally..."
-                            sh 'npm install -g @angular/cli'
+                            echo "🔄 Installing Angular CLI globally (v12.2.10)..."
+                            sh 'npm install -g @angular/cli@12.2.10'
+                            
+                            echo "🔄 Installing @angular-devkit/build-angular locally..."
+                            sh 'npm install --save-dev @angular-devkit/build-angular'
                             
                             echo "🔄 Verifying Angular CLI installation..."
                             sh 'npx ng version'
@@ -94,7 +96,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "🚀 Starting Deployment..."
-                // Add your deployment commands here
+                // Add your deployment commands here if needed
                 echo "✅ Deployment process completed!"
             }
         }
