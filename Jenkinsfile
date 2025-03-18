@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'node:16'  // Using Node.js 16 (Angular 12 supports Node 16)
+            image 'node:16'  // Use Node.js 16 for Angular 12 compatibility
             args '-u root'
         }
     }
@@ -35,8 +35,8 @@ pipeline {
                             echo "🔄 Installing Angular CLI globally (v12.2.10)..."
                             sh 'npm install -g @angular/cli@12.2.10'
                             
-                            echo "🔄 Installing @angular-devkit/build-angular locally..."
-                            sh 'npm install --save-dev @angular-devkit/build-angular'
+                            echo "🔄 Installing @angular-devkit/build-angular locally (v12.2.10)..."
+                            sh 'npm install --save-dev @angular-devkit/build-angular@12.2.10'
                             
                             echo "🔄 Verifying Angular CLI installation..."
                             sh 'npx ng version'
@@ -51,12 +51,12 @@ pipeline {
         }
         
         stage('Check Node Version') {
-           steps {
-               echo "🔍 Checking Node.js and npm versions..."
-               sh 'node -v'
-               sh 'npm -v'
-               echo "✅ Node.js and npm versions verified!"
-           }
+            steps {
+                echo "🔍 Checking Node.js and npm versions..."
+                sh 'node -v'
+                sh 'npm -v'
+                echo "✅ Node.js and npm versions verified!"
+            }
         }
       
         stage('Build') {
