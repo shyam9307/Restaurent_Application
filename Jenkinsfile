@@ -1,12 +1,13 @@
 pipeline {
     agent {
         docker {
-            image 'node:18'  // Updated to Node.js 18
+            image 'node:18'  // Using Node.js 18
             args '-u root'
         }
     }
     environment {
         NODE_ENV = "production"
+        CI = 'false'  // Disables CI mode for npm
     }
     stages {
         stage('Checkout') {
@@ -19,8 +20,15 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                    sh 'npm install'
-                    sh 'npm install -g @angular/cli'
+                    script {
+                        try {
+                            sh 'npm install --legacy-peer-deps'  // Handles dependency conflicts
+                            sh 'npm install -g @angular/cli'
+                        } catch (Exception e) {
+                            echo 'Retrying npm install with --force'
+                            sh 'npm install --force'
+                        }
+                    }
                 }
             }
         }
@@ -44,6 +52,12 @@ pipeline {
                 timeout(time: 2, unit: 'MINUTES') {
                     archiveArtifacts artifacts: 'dist/**', fingerprint: true
                 }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo '🚀 Deployment steps go here'
+                // Add deployment commands if needed
             }
         }
     }
