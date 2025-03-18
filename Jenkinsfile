@@ -1,122 +1,53 @@
 pipeline {
-    agent any
-
-    environment {
-        NODEJS_HOME = tool 'NodeJS 18+'  // Ensure this matches the Jenkins tool name
-        PATH = "${NODEJS_HOME}/bin:${env.PATH}"
+    agent {
+        docker {
+            image 'node:16'
+            args '-u root'
+        }
     }
-
+    environment {
+        // Set any environment variables if needed (e.g., NODE_ENV)
+        NODE_ENV = "production"
+    }
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/patildinu/Restaurent_Application.git'
+                // Cloning the repository from GitHub
+                git url: 'https://github.com/shyam9307/Restaurent_Application', branch: 'main'
             }
         }
-
         stage('Install Dependencies') {
             steps {
+                // Install project dependencies using npm
                 sh 'npm install'
             }
         }
-
         stage('Build') {
             steps {
-                sh 'ng build --configuration production'
+                // Build the project; change this command if your package.json uses a different build command.
+                // For Angular projects, you might use: ng build --prod
+                sh 'npm run build'
             }
         }
-
         stage('Test') {
             steps {
-                sh 'ng test --watch=false --browsers=ChromeHeadless'
+                // Run tests defined in your package.json (if available)
+                sh 'npm test'
             }
         }
-
-        stage('Deploy') {
+        stage('Archive Artifacts') {
             steps {
-                echo 'Deploying Application...'
-                // Add deployment steps here (e.g., AWS S3, Firebase, Nginx, etc.)
+                // Archive the build artifacts (adjust the path to your actual output folder)
+                archiveArtifacts artifacts: 'dist/**', fingerprint: true
             }
         }
     }
+    post {
+        success {
+            echo "✅ Build and tests completed successfully!"
+        }
+        failure {
+            echo "❌ Build failed. Please check the console output for errors."
+        }
+    }
 }
-
-
-
-
-
-// Old code
-
-// pipeline {
-//     agent any
-
-//     environment {
-//         NODE_HOME = 'C:\\Program Files\\nodejs'
-//         PATH = "${NODE_HOME};${env.PATH}"
-//     }
-
-//     stages {
-//         stage('Checkout Code') {
-//     steps {
-//         git branch: 'main', url: 'https://github.com/patildinu/Restaurent_Application.git'
-//     }
-// }
-
-//         stage('Install Dependencies') {
-//     steps {
-//         bat 'npm install'
-//     }
-// }
-
-
-//         stage('Build Angular Project') {
-//             steps {
-//                 sh 'npm run build -- --configuration=production'
-//             }
-//         }
-
-//         stage('Run Unit Tests') {
-//             steps {
-//                 sh 'npm test -- --watch=false --browsers=ChromeHeadless'
-//             }
-//         }
-
-//         stage('Publish Test Reports') {
-//             steps {
-//                 script {
-//                     publishHTML([
-//                         reportDir: 'coverage',
-//                         reportFiles: 'index.html',
-//                         reportName: 'Test Report',
-//                         allowMissing: true,
-//                         alwaysLinkToLastBuild: true,
-//                         keepAll: true
-//                     ])
-//                 }
-//             }
-//         }
-
-//         stage('Archive Build Artifacts') {
-//             steps {
-//                 archiveArtifacts artifacts: 'dist/**', fingerprint: true
-//             }
-//         }
-
-//         stage('Deploy') {
-//             steps {
-//                 echo 'Deploying the application...'
-//                 // **Add deployment commands here**
-//                 // Example: Copy built files to a server using SCP or FTP
-//                 // sh 'scp -r dist/your-angular-app/* user@your-server:/var/www/html/'
-//             }
-//         }
-//     }
-
-//     post {
-//         success {
-//             echo '✅ Build and Deployment Successful 🎉'
-//         }
-//         failure {
-//             echo '❌ Build Failed, Check Logs!'
-//         }
-//     }
-// }
