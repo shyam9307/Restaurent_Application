@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'node:18'  // Using Node.js 18
+            image 'node:18.19.0'  // Using Node.js 18.19
             args '-u root'
         }
     }
@@ -12,58 +12,90 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                echo "🔄 Starting Checkout stage..."
                 timeout(time: 2, unit: 'MINUTES') {
                     git url: 'https://github.com/shyam9307/Restaurent_Application', branch: 'main'
                 }
+                echo "✅ Checkout completed!"
             }
         }
+        
         stage('Install Dependencies') {
             steps {
+                echo "📦 Installing Dependencies..."
                 timeout(time: 5, unit: 'MINUTES') {
                     script {
                         try {
+                            sh 'echo "🔄 Running npm install --legacy-peer-deps"'
                             sh 'npm install --legacy-peer-deps'  // Handles dependency conflicts
+
+                            sh 'echo "🔄 Installing Angular CLI globally"'
                             sh 'npm install -g @angular/cli'
                         } catch (Exception e) {
-                            echo 'Retrying npm install with --force'
+                            echo '⚠️ npm install failed, retrying with --force'
                             sh 'npm install --force'
                         }
                     }
                 }
+                echo "✅ Dependencies installed successfully!"
             }
         }
+
+        stage('Check Node Version') {
+           steps {
+               echo "🔍 Checking Node.js and npm versions..."
+               sh 'node -v'
+               sh 'npm -v'
+               echo "✅ Node.js and npm versions verified!"
+           }
+        }
+      
         stage('Build') {
             steps {
+                echo "🏗️ Starting Build process..."
                 timeout(time: 10, unit: 'MINUTES') {
+                    sh 'echo "🔍 Checking Angular CLI version"'
                     sh 'ng version'  // Check Angular CLI and Node.js version before build
+
+                    sh 'echo "🔄 Running ng build"'
                     sh 'ng build'
                 }
+                echo "✅ Build completed successfully!"
             }
         }
+        
         stage('Test') {
             steps {
+                echo "🧪 Running Tests..."
                 timeout(time: 5, unit: 'MINUTES') {
                     sh 'npm test'
                 }
+                echo "✅ Tests completed!"
             }
         }
+        
         stage('Archive Artifacts') {
             steps {
+                echo "📦 Archiving Build Artifacts..."
                 timeout(time: 2, unit: 'MINUTES') {
                     archiveArtifacts artifacts: 'dist/**', fingerprint: true
                 }
+                echo "✅ Artifacts archived!"
             }
         }
+        
         stage('Deploy') {
             steps {
-                echo '🚀 Deployment steps go here'
-                // Add deployment commands if needed
+                echo "🚀 Starting Deployment..."
+                // Add deployment commands here
+                echo "✅ Deployment process completed!"
             }
         }
     }
+    
     post {
         success {
-            echo "✅ Build and tests completed successfully!"
+            echo "🎉✅ Build and tests completed successfully!"
         }
         failure {
             echo "❌ Build failed. Please check the console output for errors."
